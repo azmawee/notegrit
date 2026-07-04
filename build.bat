@@ -17,9 +17,9 @@ echo [build] notegrit.exe
 "%FASM%" "%ROOT%src\notegrit.asm" "%ROOT%notegrit.exe"
 if errorlevel 1 ( echo [build] notegrit FAILED & exit /b 1 )
 
-echo [build] Win11_x86_x64_Installer.exe
-"%FASM%" "%ROOT%src\installer.asm" "%ROOT%Win11_x86_x64_Installer.exe"
+echo [build] Win_x86_64_Installer.exe
+"%FASM%" "%ROOT%src\installer.asm" "%ROOT%Win_x86_64_Installer.exe"
 if errorlevel 1 ( echo [build] installer FAILED & exit /b 1 )
 
-echo [build] ok -^> notegrit.exe + Win11_x86_x64_Installer.exe
+echo [build] ok -^> notegrit.exe + Win_x86_64_Installer.exe
 endlocal

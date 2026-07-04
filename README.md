@@ -33,7 +33,7 @@ this is it.
   (`CreateFileMapping`), so peak memory stays low.
 - **Truly portable.** Copy one `.exe` to a USB stick and run it anywhere: no install, no
   registry, no admin rights.
-- **Real installer, also in assembly.** A second ~31 KB `Win11_x86_x64_Installer.exe`
+- **Real installer, also in assembly.** A second ~33 KB `Win_x86_64_Installer.exe`
   (built from the same FASM source, with `notegrit.exe` **embedded inside it**) wires up
   `Win+R → notegrit`, **Open With**, **Apps & Features**, an uninstaller, and an optional
   **"Edit with NoteGrit"** right-click menu. One file, nothing else to download.
@@ -68,7 +68,7 @@ The [**Releases** page](../../releases) has **two files**, pick what suits you:
 | File | Use it if... |
 |------|--------------|
 | **`notegrit.exe`** (~16 KB) | You want the **portable** editor. It's the whole app, no install, no admin, just run it (or drop it on a USB stick). |
-| **`Win11_x86_x64_Installer.exe`** (~31 KB) | You want a **proper Windows install**. `notegrit.exe` is **embedded inside**, so this one file is all you need for setup. |
+| **`Win_x86_64_Installer.exe`** (~33 KB) | You want a **proper Windows install**. `notegrit.exe` is **embedded inside**, so this one file is all you need for setup. |
 
 > No release build yet? Build it yourself in seconds, see [Build](#-build) below.
 
@@ -76,7 +76,7 @@ The [**Releases** page](../../releases) has **two files**, pick what suits you:
 
 ## 🖥️ Install (proper Windows install)
 
-Download **`Win11_x86_x64_Installer.exe`** and run it (it asks for admin via UAC).
+Download **`Win_x86_64_Installer.exe`** and run it (it asks for admin via UAC).
 `notegrit.exe` is **embedded inside the installer**, so you do **not** need to download the
 editor separately, the installer extracts and copies it for you. A small setup dialog appears
 showing the install folder and exactly what it will do, with three options:
@@ -105,8 +105,8 @@ and you're done, no installer needed.
 The installer can also extract its embedded `notegrit.exe` for you on the command line:
 
 ```
-Win11_x86_x64_Installer.exe /portable                       # extracts beside the installer
-Win11_x86_x64_Installer.exe /portable "D:\Tools\NoteGrit"   # extracts a copy there
+Win_x86_64_Installer.exe /portable                       # extracts beside the installer
+Win_x86_64_Installer.exe /portable "D:\Tools\NoteGrit"   # extracts a copy there
 ```
 
 ---
@@ -123,7 +123,7 @@ build.bat
 This assembles both binaries from source:
 
 - `src\notegrit.asm` → `notegrit.exe` (the editor)
-- `src\installer.asm` → `Win11_x86_x64_Installer.exe` (the setup; embeds `notegrit.exe`
+- `src\installer.asm` → `Win_x86_64_Installer.exe` (the setup; embeds `notegrit.exe`
   as an `RT_RCDATA` resource during the build)
 
 Both are **uncompressed** FASM PEs: no SDK, no Crinkler, no UPX, no packing.
@@ -157,7 +157,7 @@ also block rebuilds with a `write failed` error until the quarantine entry is cl
 ## 🔒 Safety & honesty
 
 - The editor needs **no admin rights** and only ever touches the file you open.
-- Only `Win11_x86_x64_Installer.exe` writes to `HKLM` / `Program Files`, and only standard, documented
+- Only `Win_x86_64_Installer.exe` writes to `HKLM` / `Program Files`, and only standard, documented
   keys (App Paths, Open With, Apps & Features, an optional `.txt` ProgID and right-click
   verb), all fully reversible via uninstall.
 - Per-user settings (Dark Mode, Zoom) live in `HKCU\Software\NoteGrit`, never in
