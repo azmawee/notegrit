@@ -13,7 +13,9 @@ CAP_TAIL  = 16        ; bytes reserved in gCap for " - Note Grit" + null (bound 
 STAT_H    = 20
 GOEDIT_ID = 1000
 SCAN_MAX  = 00040000h
-IDR_ICON  = 1
+IDR_ICON   = 1
+RT_VERSION = 16
+RT_MANIFEST = 24
 MIM_BACKGROUND      = 00000002h
 MIM_APPLYTOSUBMENUS = 80000000h
 
@@ -2265,7 +2267,18 @@ end data
 ; (a hand-built entry gave SizeofResource=0 -> LoadIcon returned NULL -> default icon).
 section '.rsrc' resource data readable
   directory RT_ICON,icons,\
-            RT_GROUP_ICON,group_icons
+            RT_GROUP_ICON,group_icons,\
+            RT_VERSION, versions,\
+            RT_MANIFEST, manifests
   resource icons,1,LANG_NEUTRAL,icon1
   resource group_icons,IDR_ICON,LANG_NEUTRAL,gic
+  resource versions, 1, LANG_NEUTRAL, verinfo
+  resource manifests, 1, LANG_NEUTRAL, manifest_data
   icon gic, icon1, '..\notegrit.ico'
+  versioninfo verinfo,VOS_NT_WINDOWS32,VFT_APP,0,LANG_NEUTRAL,0,\
+    'FileVersion','1.00',\
+    'CompanyName','Azmawee',\
+    'ProductName','NoteGrit'
+  resdata manifest_data
+    file 'notegrit.manifest'
+  endres
