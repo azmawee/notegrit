@@ -332,7 +332,6 @@ sFilter db 'Text Files',0,'*.txt',0,'All Files',0,'*.*',0,0
 sFindMsgStr db 'commdlg_FindReplace',0
 sStatic db 'STATIC',0
 sStub   db 'notepad.exe',0
-sOpen   db 'open',0
 sFace   du 'Courier',0
 sUrlGh  db 'https://github.com/azmawee/notegrit',0
 sUrlWeb db 'https://azmawee.github.io',0
@@ -396,8 +395,6 @@ txtLen  dd ?
 hPrnDC  dd ?
 hFile   dd ?
 hMem    dd ?
-hMap     dd ?
-gMapBase dd ?
 gMapOff  dd ?
 gFileSize dd ?
 estrm   EDITSTREAM ?
@@ -483,7 +480,11 @@ section '.code' code readable executable
 Main:
   invoke GetModuleHandleA,0
   mov [gInst],eax
+  invoke GetModuleHandleA,gLib
+  test eax,eax
+  jne .havedll
   invoke LoadLibraryA,gLib
+.havedll:
   invoke RegisterWindowMessageA,sFindMsgStr
   mov [gFindMsg],eax
   lea edi,[wc]
@@ -786,18 +787,10 @@ PullInFile:
   je .lclose
   mov [gFileSize],eax
   test eax,eax
-  jne .lmap
+  jne .lstream
   invoke SendMessageA,[gEdit],WM_SETTEXT,0,gZero     ; empty file
   jmp .lclose
-.lmap:
-  invoke CreateFileMappingA,[hFile],0,PAGE_READONLY,0,0,0
-  test eax,eax
-  je .lclose
-  mov [hMap],eax
-  invoke MapViewOfFile,eax,FILE_MAP_READ,0,0,0
-  test eax,eax
-  je .lclosemap
-  mov [gMapBase],eax
+.lstream:
   mov dword [gMapOff],0
   lea edi,[estrm]
   mov ecx,sizeof.EDITSTREAM/4
@@ -808,15 +801,12 @@ PullInFile:
   invoke SendMessageA,[gEdit],EM_STREAMIN,SF_TEXT,eax
   lea eax,[cfmt]
   invoke SendMessageA,[gEdit],EM_SETCHARFORMAT,SCF_ALL,eax
-  invoke UnmapViewOfFile,[gMapBase]
-.lclosemap:
-  invoke CloseHandle,[hMap]
 .lclose:
   invoke CloseHandle,[hFile]
 .ldone:
   ret
 
-; EM_STREAMIN callback: copy min(cb, remaining) bytes from the mapped view.
+; EM_STREAMIN callback: read min(cb, remaining) bytes from the file via ReadFile.
 proc StreamCallback cookie,pbBuff,cb,pcb
   push ebx esi edi
   mov edx,[gMapOff]
@@ -828,18 +818,10 @@ proc StreamCallback cookie,pbBuff,cb,pcb
   jle .tk
   mov ebx,eax                  ; ebx = min(remaining, cb)
 .tk:
-  mov eax,edx
-  add eax,ebx
-  mov [gMapOff],eax            ; advance offset
-  mov esi,[gMapBase]
-  add esi,edx
-  mov edi,[pbBuff]
-  mov ecx,ebx
-  push ebx
-  rep movsb
-  pop ebx
+  invoke ReadFile,[hFile],[pbBuff],ebx,[pcb],0
   mov eax,[pcb]
-  mov [eax],ebx                ; *pcb = bytes written
+  mov ecx,[eax]
+  add [gMapOff],ecx            ; advance offset by bytes actually read
   xor eax,eax                  ; return 0 = OK
   jmp .sret
 .sd:
@@ -1601,13 +1583,13 @@ proc AboutProc hDlg,uMsg,wParam,lParam
   xor eax,eax
   ret
 .gh:
-  invoke ShellExecuteA,[hDlg],sOpen,sUrlGh,0,0,SW_SHOWNORMAL
+  invoke MessageBoxA,[hDlg],sUrlGh,sCap,MB_OK or MB_ICONINFORMATION
   jmp .c0
 .web:
-  invoke ShellExecuteA,[hDlg],sOpen,sUrlWeb,0,0,SW_SHOWNORMAL
+  invoke MessageBoxA,[hDlg],sUrlWeb,sCap,MB_OK or MB_ICONINFORMATION
   jmp .c0
 .fb:
-  invoke ShellExecuteA,[hDlg],sOpen,sUrlFb,0,0,SW_SHOWNORMAL
+  invoke MessageBoxA,[hDlg],sUrlFb,sCap,MB_OK or MB_ICONINFORMATION
   jmp .c0
 .end:
   invoke EndDialog,[hDlg],0
@@ -2166,8 +2148,7 @@ data import
           user32,'USER32.DLL',\
           advapi32,'ADVAPI32.DLL',\
           comdlg32,'COMDLG32.DLL',\
-          gdi32,'GDI32.DLL',\
-          shell32,'SHELL32.DLL'
+          gdi32,'GDI32.DLL'
   import kernel32,\
     GetModuleHandleA,'GetModuleHandleA',\
     LoadLibraryA,'LoadLibraryA',\
@@ -2177,9 +2158,6 @@ data import
     ReadFile,'ReadFile',\
     WriteFile,'WriteFile',\
     CloseHandle,'CloseHandle',\
-    CreateFileMappingA,'CreateFileMappingA',\
-    MapViewOfFile,'MapViewOfFile',\
-    UnmapViewOfFile,'UnmapViewOfFile',\
     GlobalAlloc,'GlobalAlloc',\
     GlobalFree,'GlobalFree',\
     GetLocalTime,'GetLocalTime',\
@@ -2258,8 +2236,6 @@ data import
     SelectObject,'SelectObject',\
     GetTextExtentPoint32A,'GetTextExtentPoint32A',\
     CreateSolidBrush,'CreateSolidBrush'
-  import shell32,\
-    ShellExecuteA,'ShellExecuteA'
 end data
 
 ; resources: single-entry notegrit.ico embedded via the FASM `icon` macro, which reads
