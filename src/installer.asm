@@ -105,7 +105,7 @@ sPort    du 'NoteGrit extracted as portable.',0
 sFail    du 'Setup failed. Run as administrator, next to notegrit.exe.',0
 sNL      du 13,10,0
 ; setup-dialog text
-sTag      du 'NoteGrit v1.01 - a tiny, fast Notepad-style editor.',0
+sTag      du 'NoteGrit v1.00 - a tiny, fast Notepad-style editor.',0
 sInstHdr  du 'Install to:',0
 sBrowseTitle du 'Select the folder to install NoteGrit into:',0
 sDoesHdr  du 'This will:',0
@@ -234,7 +234,7 @@ SetupDlg:
   dw  10,8,290,10
   dw  0FFFFh
   dw  0FFFFh,0082h                ; STATIC
-  du  'NoteGrit v1.01 - a tiny, fast Notepad-style editor.',0
+  du  'NoteGrit v1.00 - a tiny, fast Notepad-style editor.',0
   dw  0
   align 4
   dd  WS_CHILD or WS_VISIBLE
