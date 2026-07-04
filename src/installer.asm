@@ -10,6 +10,7 @@ include 'win32a.inc'
 CSIDL_PROGRAM_FILESX86 = 002Ah
 RT_MANIFEST            = 24
 RT_RCDATA              = 10
+IDR_ICON               = 1
 GENERIC_WRITE          = 40000000h
 CREATE_ALWAYS          = 2
 FILE_ATTRIBUTE_NORMAL  = 00000080h
@@ -18,10 +19,11 @@ SHCNE_ASSOCCHANGED     = 08000000h
 SHCNF_IDLIST           = 00001000h
 
 ; setup-dialog control IDs
-IDC_PATH   = 100
-IDC_SHELL  = 101
-IDC_TXT    = 102
-IDC_BROWSE = 103
+IDC_PATH    = 100
+IDC_SHELL   = 101
+IDC_TXT     = 102
+IDC_BROWSE  = 103
+IDC_PORTABLE = 104
 BST_CHECKED = 1
 
 struct BROWSEINFOW
@@ -223,7 +225,7 @@ align 4
 SetupDlg:
   dd  WS_POPUP or WS_CAPTION or WS_SYSMENU or DS_MODALFRAME or DS_CENTER
   dd  0
-  dw  9                           ; control count
+  dw  10                          ; control count
   dw  0,0,310,200                 ; x,y,cx,cy (DLUs)
   dw  0                           ; menu
   dw  0                           ; class
@@ -285,6 +287,14 @@ SetupDlg:
   du  'Set as the recommended .txt editor',0
   dw  0
   align 4
+  dd  WS_CHILD or WS_VISIBLE or BS_AUTOCHECKBOX or WS_TABSTOP
+  dd  0
+  dw  10,124,290,10
+  dw  IDC_PORTABLE
+  dw  0FFFFh,0080h
+  du  'Portable (extract only, no registry entries)',0
+  dw  0
+  align 4
   dd  WS_CHILD or WS_VISIBLE or BS_PUSHBUTTON or WS_TABSTOP
   dd  0
   dw  190,176,50,14
@@ -301,7 +311,7 @@ SetupDlg:
   du  'Install',0
   dw  0
 
-; returns: 0 = cancel, else bitfield bit0=install bit1=shell bit2=.txt
+; returns: 0 = cancel, else bitfield bit0=install bit1=shell bit2=.txt bit3=portable
 proc SetupProc uses ebx,hDlg,uMsg,wParam,lParam
   cmp [uMsg],WM_INITDIALOG
   jne .ninit
@@ -349,6 +359,11 @@ proc SetupProc uses ebx,hDlg,uMsg,wParam,lParam
   jz .nt
   or ebx,4
 .nt:
+  invoke IsDlgButtonChecked,[hDlg],IDC_PORTABLE
+  test eax,eax
+  jz .nport
+  or ebx,8
+.nport:
   invoke EndDialog,[hDlg],ebx
   xor eax,eax
   ret
@@ -414,12 +429,14 @@ DoInstall:
   invoke DialogBoxIndirectParamW,[gInst],SetupDlg,0,SetupProc,0
   test eax,eax
   jz .cancel
-  push eax
+  mov ebx,eax
   call RebuildDownstream             ; recompute exePath/etc from chosen instDir
   invoke CreateDirectoryW,instDir,0
   stdcall ExtractPayload,exePath
   test eax,eax
   je .fail
+  test ebx,8                        ; portable (extract only, no registry)?
+  jnz .portdone
   invoke CopyFileW,selfPath,uninstPath,FALSE
   ; App Paths
   stdcall RegSetStrW,HKEY_LOCAL_MACHINE,kAppPaths,0,exePath
@@ -437,7 +454,6 @@ DoInstall:
   stdcall RegSetDwordW,HKEY_LOCAL_MACHINE,kUninst,vnNoModify,1
   stdcall RegSetDwordW,HKEY_LOCAL_MACHINE,kUninst,vnNoRepair,1
   invoke SHChangeNotify,SHCNE_ASSOCCHANGED,SHCNF_IDLIST,0,0
-  pop ebx
   test ebx,2                     ; "Edit with NoteGrit" right-click menu?
   jz .noshell
   stdcall RegSetStrW,HKEY_CLASSES_ROOT,kShellVerb,0,sShellTxt
@@ -459,6 +475,13 @@ DoInstall:
   stdcall WCat,gMsg,instDir
   stdcall WCat,gMsg,sNL
   stdcall WCat,gMsg,sDone3
+  invoke MessageBoxW,0,gMsg,sTitle,MB_OK or MB_ICONINFORMATION
+  invoke ExitProcess,0
+.portdone:
+  stdcall WCpy,gMsg,sPort
+  stdcall WCat,gMsg,sNL
+  stdcall WCat,gMsg,sDone2
+  stdcall WCat,gMsg,exePath
   invoke MessageBoxW,0,gMsg,sTitle,MB_OK or MB_ICONINFORMATION
   invoke ExitProcess,0
 .cancel:
@@ -768,9 +791,14 @@ data import
 end data
 
 section '.rsrc' resource data readable
-  directory RT_MANIFEST, manifests, RT_RCDATA, payloads
+  directory RT_ICON,icons,\
+            RT_GROUP_ICON,group_icons,\
+            RT_MANIFEST, manifests, RT_RCDATA, payloads
+  resource icons,1,LANG_NEUTRAL,icon1
+  resource group_icons,IDR_ICON,LANG_NEUTRAL,gic
   resource manifests, 1, LANG_NEUTRAL, manifest_data
   resource payloads, 1, LANG_NEUTRAL, payload_notegrit
+  icon gic, icon1, '..\notegrit.ico'
   resdata manifest_data
     file 'installer.manifest'
   endres
