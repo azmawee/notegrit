@@ -840,6 +840,6 @@ section '.rsrc' resource data readable
     'CompanyName','Azmawee',\
     'FileDescription','NoteGrit Setup',\
     'InternalName','installer',\
-    'OriginalFilename','Win11_x86_x64_Installer.exe',\
+    'OriginalFilename','Win_x86_64_Installer.exe',\
     'ProductName','NoteGrit',\
     'LegalCopyright','BSD-2-Clause (c) Azmawee'

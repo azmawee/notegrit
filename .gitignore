@@ -26,7 +26,7 @@ desktop.ini
 # GitHub Releases instead. (To ship them in-repo, comment out the lines below.)
 notegrit.exe
 installer.exe
-Win11_x86_x64_Installer.exe
+Win_x86_64_Installer.exe
 installer_test.exe
 installer_smoke.*
 *_smoke.*
