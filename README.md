@@ -90,35 +90,8 @@ The [**Releases** page](../../releases) has **two downloads**, pick what suits y
 | **`Win_x86_64_Installer.zip`** (~11 KB) | You want a **proper Windows install**. Contains `Win_x86_64_Installer.exe` + `notegrit.exe`. Extract to get a `NoteGrit_Installer\` folder, run the installer inside. |
 | **`notegrit.exe`** (~16 KB) | You want the **portable** editor. It's the whole app, no install, no admin, just run it (or drop it on a USB stick). |
 
-Current release is **v1.00**. See [Checksums](#-checksums) below to verify your download,
-or [Build](#-build) from source in seconds.
-
----
-
-## 🔐 Checksums
-
-Verify your downloads against these SHA256 hashes (v1.00):
-
-```
-5d352e14917875e54c1ff1eb8e0d864e76963a16d579893e03096ba893cfb6ea  notegrit.exe
-9a05747d0777b6a8ae3b27fb3b79fcb59f0cf29ccf7efe2ea0f7edbc0418724a  Win_x86_64_Installer.zip
-```
-
-PowerShell:
-
-```powershell
-Get-FileHash -Algorithm SHA256 notegrit.exe
-Get-FileHash -Algorithm SHA256 Win_x86_64_Installer.zip
-```
-
-Or, GNU-style on any shell with `sha256sum`:
-
-```
-sha256sum -c <<EOF
-5d352e14917875e54c1ff1eb8e0d864e76963a16d579893e03096ba893cfb6ea  notegrit.exe
-9a05747d0777b6a8ae3b27fb3b79fcb59f0cf29ccf7efe2ea0f7edbc0418724a  Win_x86_64_Installer.zip
-EOF
-```
+Current release is **v1.01**. SHA256 hashes are listed on each
+[release page](../../releases). Or [build](#-build) from source in seconds.
 
 ---
 
@@ -229,7 +202,7 @@ source is in `src/` for anyone to audit.
 - An AV that quarantines *and locks* the exe will also block rebuilds with a
   `write failed` error until the quarantine entry is cleared.
 
-**Signing is coming.** v1.00 is currently **unsigned**. An application to
+**Signing is coming.** v1.01 is currently **unsigned**. An application to
 [SignPath Foundation](https://signpath.org) (free Authenticode signing for open-source
 projects) is **pending approval**. Once approved, release builds will be signed via CI on
 GitHub, and signed binaries will ship from the next release onward. Local builds from
@@ -256,19 +229,20 @@ default. On Windows 11, open `ms-settings:defaultapps` and pick NoteGrit for `.t
 
 ---
 
-## 🆕 Release v1.00
+## 🆕 Release v1.01
 
-First public release. Ships two files:
+Second release. Ships two files:
 
 - **`notegrit.exe`** (15872 bytes / ~15.5 KB) - the portable editor.
-- **`Win_x86_64_Installer.zip`** (11403 bytes / ~11 KB) - a `NoteGrit_Installer\` folder
+- **`Win_x86_64_Installer.zip`** (11385 bytes / ~11 KB) - a `NoteGrit_Installer\` folder
   containing `Win_x86_64_Installer.exe` and `notegrit.exe` side by side.
 
 Both are 32-bit Windows PE files (run on x86 and x64 Windows 10/11), built directly from
-the FASM source in `src\`. See [Checksums](#-checksums) to verify your download.
+the FASM source in `src\`. SHA256 hashes are listed on each
+[release page](../../releases).
 
 Releases are signed via the [SignPath Foundation](https://signpath.org) (free Authenticode
-code signing for open-source projects). **v1.00 is currently unsigned**, pending SignPath
+code signing for open-source projects). **v1.01 is currently unsigned**, pending SignPath
 approval; signed binaries will ship from the next release onward via the
 [`release-signed`](.github/workflows/release-signed.yml) workflow.
 

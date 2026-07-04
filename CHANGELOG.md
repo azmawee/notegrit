@@ -5,6 +5,28 @@ All notable changes to NoteGrit are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.01] - 2026-07-05
+
+Second release. Same source, same binary size, but with two reliability fixes that make
+the editor handle large files without running out of memory.
+
+### Added
+
+- The PE header now sets `IMAGE_DLLCHARACTERISTICS_LARGE_ADDRESS_AWARE`. The 32-bit
+  process can use up to 4 GB of virtual address space on 64-bit Windows instead of the
+  default 2 GB ceiling, which is what lets the editor hold much larger text buffers.
+
+### Changed
+
+- The save path now writes via `EM_STREAMOUT` instead of `WM_GETTEXT` + `GlobalAlloc`.
+  This streams the editor text straight to the file in chunks and removes the full-buffer
+  allocation that used to fail on large documents.
+
+### Removed
+
+- The previous save path allocated a single buffer the size of the entire document. That
+  is gone, replaced by the streaming write above.
+
 ## [1.00] - 2026-07-05
 
 First public release. A tiny plain-text editor for Windows 10/11, written in FASM x86

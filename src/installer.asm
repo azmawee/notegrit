@@ -79,7 +79,7 @@ vnNoRepair        du 'NoRepair',0
 
 ; --- data (wide) ---
 vName  du 'NoteGrit',0
-vVer   du '1.00',0
+vVer   du '1.01',0
 vPub   du 'Azmawee',0
 vDesc  du 'NoteGrit Text Document',0
 
@@ -769,8 +769,8 @@ section '.rsrc' resource data readable
     file 'installer.manifest'
   endres
   versioninfo verinfo,VOS_NT_WINDOWS32,VFT_APP,0,LANG_NEUTRAL,0,\
-    'FileVersion','1.00',\
-    'ProductVersion','1.00',\
+    'FileVersion','1.01',\
+    'ProductVersion','1.01',\
     'CompanyName','Azmawee',\
     'FileDescription','NoteGrit Setup',\
     'InternalName','installer',\
