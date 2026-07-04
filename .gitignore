@@ -31,6 +31,6 @@ installer_test.exe
 installer_smoke.*
 *_smoke.*
 *.tmp
-NoteGrit-*.zip
+Win_x86_64_Installer.zip
 NoteGrit_Installer/
 
