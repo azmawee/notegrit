@@ -33,10 +33,10 @@ this is it.
   (`CreateFileMapping`), so peak memory stays low.
 - **Truly portable.** Copy one `.exe` to a USB stick and run it anywhere: no install, no
   registry, no admin rights.
-- **Real installer, also in assembly.** A second ~33 KB `Win_x86_64_Installer.exe`
-  (built from the same FASM source, with `notegrit.exe` **embedded inside it**) wires up
-  `Win+R → notegrit`, **Open With**, **Apps & Features**, an uninstaller, and an optional
-  **"Edit with NoteGrit"** right-click menu. One file, nothing else to download.
+- **Real installer, also in assembly.** A second ~16 KB `Win_x86_64_Installer.exe`
+  (built from the same FASM source) wires up `Win+R → notegrit`, **Open With**,
+  **Apps & Features**, an uninstaller, and an optional **"Edit with NoteGrit"** right-click
+  menu. Ships in a tiny ZIP next to `notegrit.exe` (no embedded payload, AV-friendly).
 - **Open source.** BSD-2-Clause. Builds with **FASM only**: no SDK, no linker, no
   third-party tooling.
 
@@ -63,12 +63,12 @@ word/char/line/col status bar, persistent Dark Mode + Zoom.
 
 ## ⬇️ Download
 
-The [**Releases** page](../../releases) has **two files**, pick what suits you:
+The [**Releases** page](../../releases) has **two downloads**, pick what suits you:
 
-| File | Use it if... |
-|------|--------------|
+| Download | Use it if... |
+|----------|--------------|
+| **`NoteGrit-1.00.zip`** (~11 KB) | You want a **proper Windows install**. Contains `Win_x86_64_Installer.exe` + `notegrit.exe`. Extract both to the same folder, run the installer. |
 | **`notegrit.exe`** (~16 KB) | You want the **portable** editor. It's the whole app, no install, no admin, just run it (or drop it on a USB stick). |
-| **`Win_x86_64_Installer.exe`** (~33 KB) | You want a **proper Windows install**. `notegrit.exe` is **embedded inside**, so this one file is all you need for setup. |
 
 > No release build yet? Build it yourself in seconds, see [Build](#-build) below.
 
@@ -76,10 +76,10 @@ The [**Releases** page](../../releases) has **two files**, pick what suits you:
 
 ## 🖥️ Install (proper Windows install)
 
-Download **`Win_x86_64_Installer.exe`** and run it (it asks for admin via UAC).
-`notegrit.exe` is **embedded inside the installer**, so you do **not** need to download the
-editor separately, the installer extracts and copies it for you. A small setup dialog appears
-showing the install folder and exactly what it will do, with three options:
+Download **`NoteGrit-1.00.zip`**, extract **both** files to the same folder, then run
+**`Win_x86_64_Installer.exe`** (it asks for admin via UAC). The installer copies
+`notegrit.exe` (which must sit beside it) into the install folder. A small setup dialog
+appears showing the install folder and exactly what it will do, with three options:
 
 - **[✓] Add "Edit with NoteGrit" to the right-click menu** *(on by default)*, right-click
   *any* file to open it in NoteGrit.
@@ -89,10 +89,10 @@ showing the install folder and exactly what it will do, with three options:
   `notegrit.exe` into the folder shown, no `Win+R`, no Open With, no uninstaller. Same as a
   portable download but from inside the installer.
 
-Click **Install** and the installer extracts `notegrit.exe` to
+Click **Install** and the installer copies `notegrit.exe` to
 `C:\Program Files (x86)\NoteGrit\`, registers it for **Win+R → `notegrit`**, adds it to
 **Open With** and **Apps & Features** (so you can uninstall it from Settings), and applies
-the chosen options. Tick **Portable** instead and it only extracts the `.exe`, nothing else.
+the chosen options. Tick **Portable** instead and it only copies the `.exe`, nothing else.
 
 ---
 
@@ -102,11 +102,11 @@ Want it portable? Just download **`notegrit.exe`** from the Releases page. It ru
 standalone with **no install and no registry entries**. Copy it to any folder or USB drive
 and you're done, no installer needed.
 
-The installer can also extract its embedded `notegrit.exe` for you on the command line:
+The installer can also copy `notegrit.exe` (must sit beside it) for you on the command line:
 
 ```
-Win_x86_64_Installer.exe /portable                       # extracts beside the installer
-Win_x86_64_Installer.exe /portable "D:\Tools\NoteGrit"   # extracts a copy there
+Win_x86_64_Installer.exe /portable                       # copies beside the installer
+Win_x86_64_Installer.exe /portable "D:\Tools\NoteGrit"   # copies a copy there
 ```
 
 ---
@@ -120,13 +120,14 @@ extracted to `tools\fasm\`. Then:
 build.bat
 ```
 
-This assembles both binaries from source:
+This assembles both binaries from source and packages them into a release ZIP:
 
 - `src\notegrit.asm` → `notegrit.exe` (the editor)
-- `src\installer.asm` → `Win_x86_64_Installer.exe` (the setup; embeds `notegrit.exe`
-  as an `RT_RCDATA` resource during the build)
+- `src\installer.asm` → `Win_x86_64_Installer.exe` (the setup; copies `notegrit.exe`
+  from beside it at install time, no embedded payload)
+- both → `NoteGrit-<version>.zip` (the release package, version read from `VERSION.txt`)
 
-Both are **uncompressed** FASM PEs: no SDK, no Crinkler, no UPX, no packing.
+Both binaries are **uncompressed** FASM PEs: no SDK, no Crinkler, no UPX, no packing.
 
 ---
 

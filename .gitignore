@@ -31,4 +31,5 @@ installer_test.exe
 installer_smoke.*
 *_smoke.*
 *.tmp
+NoteGrit-*.zip
 
