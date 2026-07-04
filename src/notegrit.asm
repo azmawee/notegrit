@@ -1265,7 +1265,7 @@ ApplyZoom:
   ret
 
 ZoomIn:
-  add dword [gZoom],15
+  add dword [gZoom],45
   cmp dword [gZoom],630
   jle .zin
   mov dword [gZoom],630
@@ -1275,7 +1275,7 @@ ZoomIn:
   ret
 
 ZoomOut:
-  sub dword [gZoom],15
+  sub dword [gZoom],45
   cmp dword [gZoom],10
   jge .zok
   mov dword [gZoom],10
