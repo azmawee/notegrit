@@ -25,9 +25,15 @@ if errorlevel 1 ( echo [build] installer FAILED & exit /b 1 )
 echo [build] NoteGrit release ZIP
 set /p VER=<"%ROOT%VERSION.txt"
 set "ZIP=%ROOT%NoteGrit-%VER%.zip"
+set "PKG=%ROOT%NoteGrit_Installer"
 if exist "%ZIP%" del "%ZIP%"
-powershell -NoProfile -Command "Compress-Archive -Path '%ROOT%notegrit.exe','%ROOT%Win_x86_64_Installer.exe' -DestinationPath '%ZIP%'"
+if exist "%PKG%" rmdir /s /q "%PKG%"
+mkdir "%PKG%"
+copy /Y "%ROOT%notegrit.exe" "%PKG%\" >nul
+copy /Y "%ROOT%Win_x86_64_Installer.exe" "%PKG%\" >nul
+powershell -NoProfile -Command "Compress-Archive -Path '%PKG%' -DestinationPath '%ZIP%'"
 if errorlevel 1 ( echo [build] ZIP FAILED & exit /b 1 )
+rmdir /s /q "%PKG%"
 
 echo [build] ok -^> notegrit.exe + Win_x86_64_Installer.exe + NoteGrit-%VER%.zip
 endlocal
