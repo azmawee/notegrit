@@ -209,10 +209,31 @@ mode, zoom, word count, streamed file loading, and an installer) into 16 KB.
 
 NoteGrit ships **uncompressed** (a plain FASM PE) with a deliberately small import table
 (no `CreateFileMapping`, no `ShellExecute`, no `LoadLibrary` for known Windows DLLs), so it
-is almost never flagged, unlike tiny *packed* executables. If your AV still quarantines it,
-it is a false positive: submit it for review and add a folder exclusion. (An AV that
-quarantines *and locks* the exe will also block rebuilds with a `write failed` error until
-the quarantine entry is cleared.)
+is almost never flagged, unlike tiny *packed* executables.
+
+**Known false positive.** Some vendors (notably F-Secure, Avira, and a few others using
+the Bitdefender engine) still flag `notegrit.exe` as `TR/Crypt.XPACK.Gen` or a similar
+generic packer/trojan detection. This is a **false positive** caused by the tiny size
+(~15.5 KB) combined with a minimal import table, which looks similar to real packers to
+their heuristics. There is **no packing, no encryption, no obfuscation**, and the full
+source is in `src/` for anyone to audit.
+
+**What to do if it is flagged:**
+
+- Submit `notegrit.exe` to the vendor as a false positive sample:
+  - F-Secure: https://www.f-secure.com/en/home/support/samples
+  - Microsoft: https://www.microsoft.com/en-us/wdsi/filesubmission
+  - Your AV vendor's sample submission page
+- Add the install folder (or the portable `.exe` location) to your AV exclusions while the
+  signature update propagates, usually 1 to 2 weeks after submission.
+- An AV that quarantines *and locks* the exe will also block rebuilds with a
+  `write failed` error until the quarantine entry is cleared.
+
+**Signing is coming.** v1.00 is currently **unsigned**. An application to
+[SignPath Foundation](https://signpath.org) (free Authenticode signing for open-source
+projects) is **pending approval**. Once approved, release builds will be signed via CI on
+GitHub, and signed binaries will ship from the next release onward. Local builds from
+source remain unsigned by default.
 
 ---
 
