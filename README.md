@@ -29,8 +29,8 @@ this is it.
 - **Smooth zoom.** `Ctrl` + `mouse wheel` (browser-style), `Ctrl`+`+` / `Ctrl`+`-` /
   `Ctrl`+`0`, with the live zoom % in the status bar. Your zoom level is remembered.
 - **Live counts.** Words, characters, line and column, updated as you type.
-- **Big files.** Large files are streamed into the editor via memory-mapped loading
-  (`CreateFileMapping`), so peak memory stays low.
+- **Big files.** Large files are streamed into the editor via chunked `ReadFile`, so peak
+  memory stays low.
 - **Truly portable.** Copy one `.exe` to a USB stick and run it anywhere: no install, no
   registry, no admin rights.
 - **Real installer, also in assembly.** A second ~16 KB `Win_x86_64_Installer.exe`
@@ -70,7 +70,35 @@ The [**Releases** page](../../releases) has **two downloads**, pick what suits y
 | **`Win_x86_64_Installer.zip`** (~11 KB) | You want a **proper Windows install**. Contains `Win_x86_64_Installer.exe` + `notegrit.exe`. Extract to get a `NoteGrit_Installer\` folder, run the installer inside. |
 | **`notegrit.exe`** (~16 KB) | You want the **portable** editor. It's the whole app, no install, no admin, just run it (or drop it on a USB stick). |
 
-> No release build yet? Build it yourself in seconds, see [Build](#-build) below.
+Current release is **v1.00**. See [Checksums](#-checksums) below to verify your download,
+or [Build](#-build) from source in seconds.
+
+---
+
+## 🔐 Checksums
+
+Verify your downloads against these SHA256 hashes (v1.00):
+
+```
+5d352e14917875e54c1ff1eb8e0d864e76963a16d579893e03096ba893cfb6ea  notegrit.exe
+9a05747d0777b6a8ae3b27fb3b79fcb59f0cf29ccf7efe2ea0f7edbc0418724a  Win_x86_64_Installer.zip
+```
+
+PowerShell:
+
+```powershell
+Get-FileHash -Algorithm SHA256 notegrit.exe
+Get-FileHash -Algorithm SHA256 Win_x86_64_Installer.zip
+```
+
+Or, GNU-style on any shell with `sha256sum`:
+
+```
+sha256sum -c <<EOF
+5d352e14917875e54c1ff1eb8e0d864e76963a16d579893e03096ba893cfb6ea  notegrit.exe
+9a05747d0777b6a8ae3b27fb3b79fcb59f0cf29ccf7efe2ea0f7edbc0418724a  Win_x86_64_Installer.zip
+EOF
+```
 
 ---
 
@@ -123,10 +151,20 @@ avengers_assemble.bat
 
 This assembles both binaries from source and packages them into a release ZIP:
 
-- `src\notegrit.asm` → `notegrit.exe` (the editor)
+- `src\notegrit.asm` → `notegrit.exe` (the editor, ~16 KB)
 - `src\installer.asm` → `Win_x86_64_Installer.exe` (the setup; copies `notegrit.exe`
-  from beside it at install time, no embedded payload)
-- both → `NoteGrit-<version>.zip` (the release package, version read from `VERSION.txt`)
+  from beside it at install time, no embedded payload, ~17 KB)
+- both → `Win_x86_64_Installer.zip` (a `NoteGrit_Installer\` folder containing the two
+  binaries, ~11 KB)
+
+Rebuild from a clean checkout anytime:
+
+```
+git clone https://github.com/azmawee/notegrit.git
+cd notegrit
+:: place FASM at tools\fasm\ , then:
+avengers_assemble.bat
+```
 
 Both binaries are **uncompressed** FASM PEs: no SDK, no Crinkler, no UPX, no packing.
 
@@ -143,16 +181,18 @@ Both binaries are **uncompressed** FASM PEs: no SDK, no Crinkler, no UPX, no pac
 | VS Code | ~95 MB | ~6300× |
 
 *Sizes are approximate, for perspective only.* NoteGrit fits its entire feature set (dark
-mode, zoom, word count, memory-mapped file loading, and an installer) into 16 KB.
+mode, zoom, word count, streamed file loading, and an installer) into 16 KB.
 
 ---
 
 ## 🛡️ About antivirus
 
-NoteGrit ships **uncompressed** (a plain FASM PE), so it is almost never flagged, unlike
-tiny *packed* executables. If your AV still quarantines it, it is a false positive: submit
-it for review and add a folder exclusion. (An AV that quarantines *and locks* the exe will
-also block rebuilds with a `write failed` error until the quarantine entry is cleared.)
+NoteGrit ships **uncompressed** (a plain FASM PE) with a deliberately small import table
+(no `CreateFileMapping`, no `ShellExecute`, no `LoadLibrary` for known Windows DLLs), so it
+is almost never flagged, unlike tiny *packed* executables. If your AV still quarantines it,
+it is a false positive: submit it for review and add a folder exclusion. (An AV that
+quarantines *and locks* the exe will also block rebuilds with a `write failed` error until
+the quarantine entry is cleared.)
 
 ---
 
@@ -172,6 +212,19 @@ also block rebuilds with a `write failed` error until the quarantine entry is cl
 Windows 10/11 **blocks silent default-app changes** (UserChoice hash protection), so the
 installer registers NoteGrit to *appear* in Open With / Default Apps rather than forcing the
 default. On Windows 11, open `ms-settings:defaultapps` and pick NoteGrit for `.txt`.
+
+---
+
+## 🆕 Release v1.00
+
+First public release. Ships two files:
+
+- **`notegrit.exe`** (15872 bytes / ~15.5 KB) - the portable editor.
+- **`Win_x86_64_Installer.zip`** (11403 bytes / ~11 KB) - a `NoteGrit_Installer\` folder
+  containing `Win_x86_64_Installer.exe` and `notegrit.exe` side by side.
+
+Both are 32-bit Windows PE files (run on x86 and x64 Windows 10/11), built directly from
+the FASM source in `src\`. See [Checksums](#-checksums) to verify your download.
 
 ---
 
