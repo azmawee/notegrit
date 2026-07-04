@@ -108,8 +108,9 @@ sFail    du 'Setup failed. Run as administrator, next to notegrit.exe.',0
 sNL      du 13,10,0
 ; setup-dialog text
 sTag      du 'NoteGrit v1.00 - a tiny, fast Notepad-style editor.',0
-sInstHdr  du 'Install to:',0
+sInstHdr  du 'Install to this PC:',0
 sBrowseTitle du 'Select the folder to install NoteGrit into:',0
+sBrowsePortTitle du 'Select the folder to extract the portable NoteGrit to:',0
 sDoesHdr  du 'This will:',0
 sDoesBody du 'Copy notegrit.exe and add it to Run (Win+R -> notegrit), Open With, and Apps & Features (uninstallable from Settings).',0
 sChkShell du 'Add "Edit with NoteGrit" to the right-click menu',0
@@ -212,6 +213,7 @@ ComputePaths:
   stdcall WQuote,regCmd,exePath
   stdcall WCat,regCmd,sSpacePct1
   stdcall WQuote,uninstQuoted,uninstPath
+  stdcall WCpy,portDir,runDir
   xor eax,eax
   ret
 .err:
@@ -241,15 +243,15 @@ SetupDlg:
   align 4
   dd  WS_CHILD or WS_VISIBLE
   dd  0
-  dw  10,30,48,9
+  dw  10,30,72,9
   dw  0FFFFh
   dw  0FFFFh,0082h                ; STATIC
-  du  'Install to:',0
+  du  'Install to this PC:',0
   dw  0
   align 4
   dd  WS_CHILD or WS_VISIBLE or WS_BORDER or WS_TABSTOP or ES_AUTOHSCROLL
   dd  0
-  dw  60,27,190,14
+  dw  82,27,168,14
   dw  IDC_PATH
   dw  0FFFFh,0081h                ; EDIT
   du  '',0
@@ -329,10 +331,12 @@ proc SetupProc uses ebx,hDlg,uMsg,wParam,lParam
   je .browse
   cmp ax,IDOK
   je .ok
+  cmp ax,IDC_PORTABLE
+  je .portable
   xor eax,eax
   ret
 .browse:
-  stdcall BrowseFolder,[hDlg]
+  stdcall BrowseFolder,[hDlg],instDir,sBrowseTitle
   test eax,eax
   jz .nb
   invoke SetDlgItemTextW,[hDlg],IDC_PATH,instDir
@@ -344,10 +348,17 @@ proc SetupProc uses ebx,hDlg,uMsg,wParam,lParam
   xor eax,eax
   ret
 .ok:
-  ; read the (possibly edited) folder back into instDir before closing
+  ; portable uses the picker's portDir; otherwise read the edit box
+  invoke IsDlgButtonChecked,[hDlg],IDC_PORTABLE
+  test eax,eax
+  jz .okread
+  stdcall WCpy,instDir,portDir
+  jmp .okflags
+.okread:
   invoke GetDlgItemTextW,[hDlg],IDC_PATH,instDir,MAXP
   test eax,eax
   jz .cancel
+.okflags:
   mov ebx,1
   invoke IsDlgButtonChecked,[hDlg],IDC_SHELL
   test eax,eax
@@ -367,6 +378,34 @@ proc SetupProc uses ebx,hDlg,uMsg,wParam,lParam
   invoke EndDialog,[hDlg],ebx
   xor eax,eax
   ret
+.portable:
+  invoke IsDlgButtonChecked,[hDlg],IDC_PORTABLE
+  test eax,eax
+  jz .porten
+  ; checked: grey out install-location box + shell/.txt (portable = no registry)
+  invoke GetDlgItem,[hDlg],IDC_PATH
+  invoke EnableWindow,eax,FALSE
+  invoke GetDlgItem,[hDlg],IDC_BROWSE
+  invoke EnableWindow,eax,FALSE
+  invoke GetDlgItem,[hDlg],IDC_SHELL
+  invoke EnableWindow,eax,FALSE
+  invoke GetDlgItem,[hDlg],IDC_TXT
+  invoke EnableWindow,eax,FALSE
+  ; ask where to extract the portable build
+  stdcall BrowseFolder,[hDlg],portDir,sBrowsePortTitle
+  xor eax,eax
+  ret
+.porten:
+  invoke GetDlgItem,[hDlg],IDC_PATH
+  invoke EnableWindow,eax,TRUE
+  invoke GetDlgItem,[hDlg],IDC_BROWSE
+  invoke EnableWindow,eax,TRUE
+  invoke GetDlgItem,[hDlg],IDC_SHELL
+  invoke EnableWindow,eax,TRUE
+  invoke GetDlgItem,[hDlg],IDC_TXT
+  invoke EnableWindow,eax,TRUE
+  xor eax,eax
+  ret
 .ncmd:
   xor eax,eax
   ret
@@ -374,7 +413,7 @@ endp
 
 ; ---- folder picker: SHBrowseForFolder. on OK copies the chosen path to instDir ----
 ; returns eax=1 if a folder was chosen, eax=0 if cancelled/failed
-proc BrowseFolder uses ebx edi,hDlg
+proc BrowseFolder uses ebx edi,hDlg,dst,title
   locals
     bi   BROWSEINFOW ?
     pidl dd ?
@@ -387,8 +426,8 @@ proc BrowseFolder uses ebx edi,hDlg
   mov [bi.hwndOwner],eax
   and dword [bi.pidlRoot],0
   mov dword [bi.pszDisplayName],pfBuf
-  mov dword [bi.lpszTitle],sBrowseTitle
-  mov dword [bi.ulFlags],BIF_RETURNONLYFSDIRS
+  mov ebx,[title]
+  mov [bi.lpszTitle],ebx
   and dword [bi.lpfn],0
   and dword [bi.lParam],0
   lea eax,[bi]
@@ -396,7 +435,7 @@ proc BrowseFolder uses ebx edi,hDlg
   test eax,eax
   jz .cancel
   mov [pidl],eax
-  invoke SHGetPathFromIDListW,[pidl],instDir
+  invoke SHGetPathFromIDListW,[pidl],[dst]
   push eax
   invoke CoTaskMemFree,[pidl]
   pop eax
@@ -787,7 +826,9 @@ data import
     SetDlgItemTextW,'SetDlgItemTextW',\
     GetDlgItemTextW,'GetDlgItemTextW',\
     CheckDlgButton,'CheckDlgButton',\
-    IsDlgButtonChecked,'IsDlgButtonChecked'
+    IsDlgButtonChecked,'IsDlgButtonChecked',\
+    EnableWindow,'EnableWindow',\
+    GetDlgItem,'GetDlgItem'
 end data
 
 section '.rsrc' resource data readable
