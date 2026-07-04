@@ -1,0 +1,34 @@
+# FASM toolchain is downloaded separately - do not ship it in the repo.
+# See README / build.bat. Get FASM from https://flatassembler.net
+tools/
+
+# dev scratch / debugging
+bin/
+
+# build intermediates
+*.obj
+*.pdb
+*.ilk
+*.map
+*.exp
+
+# editor / OS cruft
+*.bak
+Thumbs.db
+desktop.ini
+
+# local-only AI-tooling config, never ship to GitHub
+.claudeignore
+.claude/
+.opencode/
+
+# Built binaries. Source-first: build with build.bat. Prebuilt exes ship via
+# GitHub Releases instead. (To ship them in-repo, comment out the lines below.)
+notegrit.exe
+installer.exe
+Win11_x86_x64_Installer.exe
+installer_test.exe
+installer_smoke.*
+*_smoke.*
+*.tmp
+

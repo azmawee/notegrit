@@ -1,0 +1,25 @@
+@echo off
+REM NoteGrit build - assembles src\notegrit.asm and src\installer.asm with FASM. BSD-2 (see LICENSE).
+setlocal enableextensions
+set "ROOT=%~dp0"
+set "FASM=%ROOT%tools\fasm\FASM.EXE"
+set "INC=%ROOT%tools\fasm\INCLUDE"
+
+if not exist "%FASM%" (
+  echo [build] FASM not found: %FASM%
+  echo [build] Get it from https://flatassembler.net ^(.zip^), extract to tools\fasm\
+  exit /b 1
+)
+
+set "INCLUDE=%INC%"
+
+echo [build] notegrit.exe
+"%FASM%" "%ROOT%src\notegrit.asm" "%ROOT%notegrit.exe"
+if errorlevel 1 ( echo [build] notegrit FAILED & exit /b 1 )
+
+echo [build] Win11_x86_x64_Installer.exe
+"%FASM%" "%ROOT%src\installer.asm" "%ROOT%Win11_x86_x64_Installer.exe"
+if errorlevel 1 ( echo [build] installer FAILED & exit /b 1 )
+
+echo [build] ok -^> notegrit.exe + Win11_x86_x64_Installer.exe
+endlocal
