@@ -61,6 +61,26 @@ word/char/line/col status bar, persistent Dark Mode + Zoom.
 
 ---
 
+## 📸 Screenshots
+
+**Dark mode** with the live status bar (line/col, char/word count, zoom %):
+
+![Dark mode](Screenshots/Darkmode.png)
+
+**Menus:**
+
+| Edit | View | Format |
+|:---:|:---:|:---:|
+| ![Edit menu](Screenshots/Menu01.png) | ![View menu](Screenshots/menu02.png) | ![Format menu](Screenshots/menu04.png) |
+
+**Font picker and About dialog:**
+
+| Font dialog | About |
+|:---:|:---:|
+| ![Font dialog](Screenshots/menu93.png) | ![About dialog](Screenshots/About.png) |
+
+---
+
 ## ⬇️ Download
 
 The [**Releases** page](../../releases) has **two downloads**, pick what suits you:
