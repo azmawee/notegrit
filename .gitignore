@@ -32,4 +32,5 @@ installer_smoke.*
 *_smoke.*
 *.tmp
 NoteGrit-*.zip
+NoteGrit_Installer/
 
