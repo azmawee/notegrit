@@ -118,7 +118,7 @@ You need [FASM](https://flatassembler.net) (portable, ~2 MB, e.g. `fasmw17332.zi
 extracted to `tools\fasm\`. Then:
 
 ```
-build.bat
+avengers_assemble.bat
 ```
 
 This assembles both binaries from source and packages them into a release ZIP:

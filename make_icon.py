@@ -21,7 +21,7 @@ Run:
   python make_icon.py
 
 This script only writes icon files. It never touches notegrit.asm / .rsrc /
-build.bat. To embed, the user updates the .rsrc directory themselves later.
+avengers_assemble.bat. To embed, the user updates the .rsrc directory themselves later.
 """
 
 from PIL import Image, ImageDraw
