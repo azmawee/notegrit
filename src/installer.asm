@@ -9,6 +9,7 @@ include 'win32a.inc'
 
 CSIDL_PROGRAM_FILESX86 = 002Ah
 RT_MANIFEST            = 24
+RT_VERSION             = 16
 RT_RCDATA              = 10
 IDR_ICON               = 1
 GENERIC_WRITE          = 40000000h
@@ -54,7 +55,6 @@ runDir      rb MAXP*2
 portDir     rb MAXP*2
 regCmd      rb MAXP*2
 uninstQuoted rb MAXP*2
-cmdParams   rb MAXP*4
 gMsg        rb MAXP*4
 
 ; --- registry sub-keys (wide) ---
@@ -93,16 +93,10 @@ sSubNotegritExe   du '\notegrit.exe',0
 sSubUninstallExe  du '\uninstall.exe',0
 sSpacePct1        du ' "%1"',0
 
-; --- cmd self-delete fragments (wide) ---
-sCmdHead du '/c ping -n 3 127.0.0.1 >nul & del "',0
-sCmdMid  du '" & rd /s /q "',0
-sCmdTail du '"',0
-sCmdExe  du 'cmd.exe',0
-
 ; --- messages (wide) ---
 sTitle   du 'NoteGrit Setup',0
 sAskUn   du 'Uninstall NoteGrit? Files and registry entries will be removed.',0
-sUnDone  du 'NoteGrit uninstalled (folder will be removed shortly).',0
+sUnDone  du 'NoteGrit uninstalled. You can delete the install folder manually.',0
 sPort    du 'NoteGrit extracted as portable.',0
 sFail    du 'Setup failed. Run as administrator, next to notegrit.exe.',0
 sNL      du 13,10,0
@@ -544,13 +538,6 @@ DoUninstall:
   invoke SHDeleteKeyW,HKEY_LOCAL_MACHINE,kUninst
   invoke DeleteFileW,exePath
   invoke SHChangeNotify,SHCNE_ASSOCCHANGED,SHCNF_IDLIST,0,0
-  ; self-delete via cmd (runs after this process exits)
-  stdcall WCpy,cmdParams,sCmdHead
-  stdcall WCat,cmdParams,uninstPath
-  stdcall WCat,cmdParams,sCmdMid
-  stdcall WCat,cmdParams,instDir
-  stdcall WCat,cmdParams,sCmdTail
-  invoke ShellExecuteW,0,0,sCmdExe,cmdParams,0,SW_HIDE
   invoke MessageBoxW,0,sUnDone,sTitle,MB_OK or MB_ICONINFORMATION
   invoke ExitProcess,0
 
@@ -810,7 +797,6 @@ data import
     RegCloseKey,'RegCloseKey'
   import shell32,\
     SHGetFolderPathW,'SHGetFolderPathW',\
-    ShellExecuteW,'ShellExecuteW',\
     SHChangeNotify,'SHChangeNotify',\
     SHBrowseForFolderW,'SHBrowseForFolderW',\
     SHGetPathFromIDListW,'SHGetPathFromIDListW'
@@ -834,11 +820,13 @@ end data
 section '.rsrc' resource data readable
   directory RT_ICON,icons,\
             RT_GROUP_ICON,group_icons,\
-            RT_MANIFEST, manifests, RT_RCDATA, payloads
+            RT_MANIFEST, manifests, RT_RCDATA, payloads,\
+            RT_VERSION, versions
   resource icons,1,LANG_NEUTRAL,icon1
   resource group_icons,IDR_ICON,LANG_NEUTRAL,gic
   resource manifests, 1, LANG_NEUTRAL, manifest_data
   resource payloads, 1, LANG_NEUTRAL, payload_notegrit
+  resource versions, 1, LANG_NEUTRAL, verinfo
   icon gic, icon1, '..\notegrit.ico'
   resdata manifest_data
     file 'installer.manifest'
@@ -846,3 +834,12 @@ section '.rsrc' resource data readable
   resdata payload_notegrit
     file '..\notegrit.exe'
   endres
+  versioninfo verinfo,VOS_NT_WINDOWS32,VFT_APP,0,LANG_NEUTRAL,0,\
+    'FileVersion','1.00',\
+    'ProductVersion','1.00',\
+    'CompanyName','Azmawee',\
+    'FileDescription','NoteGrit Setup',\
+    'InternalName','installer',\
+    'OriginalFilename','Win11_x86_x64_Installer.exe',\
+    'ProductName','NoteGrit',\
+    'LegalCopyright','BSD-2-Clause (c) Azmawee'
