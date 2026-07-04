@@ -79,17 +79,20 @@ The [**Releases** page](../../releases) has **two files**, pick what suits you:
 Download **`Win11_x86_x64_Installer.exe`** and run it (it asks for admin via UAC).
 `notegrit.exe` is **embedded inside the installer**, so you do **not** need to download the
 editor separately, the installer extracts and copies it for you. A small setup dialog appears
-showing the install folder and exactly what it will do, with two options:
+showing the install folder and exactly what it will do, with three options:
 
 - **[✓] Add "Edit with NoteGrit" to the right-click menu** *(on by default)*, right-click
   *any* file to open it in NoteGrit.
 - **[ ] Set as the recommended .txt editor** *(off by default)*, appears in Open With /
   Default Apps.
+- **[ ] Portable (extract only, no registry entries)** *(off by default)*, just extracts
+  `notegrit.exe` into the folder shown, no `Win+R`, no Open With, no uninstaller. Same as a
+  portable download but from inside the installer.
 
 Click **Install** and the installer extracts `notegrit.exe` to
 `C:\Program Files (x86)\NoteGrit\`, registers it for **Win+R → `notegrit`**, adds it to
 **Open With** and **Apps & Features** (so you can uninstall it from Settings), and applies
-the chosen options.
+the chosen options. Tick **Portable** instead and it only extracts the `.exe`, nothing else.
 
 ---
 
