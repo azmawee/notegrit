@@ -1,14 +1,14 @@
 # NoteGrit
 
-**A tiny, blazing-fast text editor for Windows, in a single 15 KB executable.**
+**A tiny, blazing-fast text editor for Windows, in a single 16 KB executable.**
 
-![size](https://img.shields.io/badge/size-15%20KB-orange)
+![size](https://img.shields.io/badge/size-16%20KB-orange)
 ![license](https://img.shields.io/badge/license-BSD--2-blue)
 ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6)
 ![lang](https://img.shields.io/badge/written%20in-FASM%20assembly-red)
 
 NoteGrit is a featherweight plain-text editor for **Windows 10 and 11**. It ships as
-one **15 KB** `.exe` with **no runtime, no dependencies, no .NET, no Electron**, just pure
+one **16 KB** `.exe` with **no runtime, no dependencies, no .NET, no Electron**, just pure
 x86 assembly. It opens instantly, remembers your theme and zoom, edits huge files without
 breaking a sweat, and even comes with its own tiny Windows installer.
 
@@ -19,9 +19,9 @@ this is it.
 
 ## ✨ Why NoteGrit?
 
-- **15 KB, total.** The whole editor, icons and all, is smaller than a single photo.
-  Roughly **1/270th the size of Notepad++** and **1/6300th of VS Code** (see
-  [How small is 15 KB?](#how-small-is-15-kb)).
+- **16 KB, total.** The whole editor, icons and all, is smaller than a single photo.
+  Roughly **1/250th the size of Notepad++** and **1/6000th of VS Code** (see
+  [How small is 16 KB?](#how-small-is-16-kb)).
 - **Instant startup.** No frameworks to load, no JIT, double-click and you're typing.
 - **Familiar.** Classic Notepad layout, menus, and shortcuts. Nothing to relearn.
 - **Dark Mode.** Editor, menu bar **and** status bar theme together, and it **stays dark**
@@ -67,7 +67,7 @@ The [**Releases** page](../../releases) has **two files**, pick what suits you:
 
 | File | Use it if... |
 |------|--------------|
-| **`notegrit.exe`** (~15 KB) | You want the **portable** editor. It's the whole app, no install, no admin, just run it (or drop it on a USB stick). |
+| **`notegrit.exe`** (~16 KB) | You want the **portable** editor. It's the whole app, no install, no admin, just run it (or drop it on a USB stick). |
 | **`Win11_x86_x64_Installer.exe`** (~31 KB) | You want a **proper Windows install**. `notegrit.exe` is **embedded inside**, so this one file is all you need for setup. |
 
 > No release build yet? Build it yourself in seconds, see [Build](#-build) below.
@@ -130,18 +130,18 @@ Both are **uncompressed** FASM PEs: no SDK, no Crinkler, no UPX, no packing.
 
 ---
 
-## 🤏 How small is 15 KB?
+## 🤏 How small is 16 KB?
 
 | Editor | Approx. size | vs NoteGrit |
 |--------|-------------|-------------|
-| **NoteGrit** | **0.015 MB** | - |
+| **NoteGrit** | **0.016 MB** | - |
 | Windows Notepad (classic) | ~0.18 MB | ~12× |
 | Notepad++ | ~4 MB | ~270× |
 | Sublime Text | ~10 MB | ~670× |
 | VS Code | ~95 MB | ~6300× |
 
 *Sizes are approximate, for perspective only.* NoteGrit fits its entire feature set (dark
-mode, zoom, word count, memory-mapped file loading, and an installer) into 15 KB.
+mode, zoom, word count, memory-mapped file loading, and an installer) into 16 KB.
 
 ---
 
