@@ -1,5 +1,5 @@
 # FASM toolchain is downloaded separately - do not ship it in the repo.
-# See README / build.bat. Get FASM from https://flatassembler.net
+# See README / avengers_assemble.bat. Get FASM from https://flatassembler.net
 tools/
 
 # dev scratch / debugging
@@ -22,7 +22,7 @@ desktop.ini
 .claude/
 .opencode/
 
-# Built binaries. Source-first: build with build.bat. Prebuilt exes ship via
+# Built binaries. Source-first: build with avengers_assemble.bat. Prebuilt exes ship via
 # GitHub Releases instead. (To ship them in-repo, comment out the lines below.)
 notegrit.exe
 installer.exe
