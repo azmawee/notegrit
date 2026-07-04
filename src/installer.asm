@@ -10,11 +10,7 @@ include 'win32a.inc'
 CSIDL_PROGRAM_FILESX86 = 002Ah
 RT_MANIFEST            = 24
 RT_VERSION             = 16
-RT_RCDATA              = 10
 IDR_ICON               = 1
-GENERIC_WRITE          = 40000000h
-CREATE_ALWAYS          = 2
-FILE_ATTRIBUTE_NORMAL  = 00000080h
 MAXP                   = 260
 SHCNE_ASSOCCHANGED     = 08000000h
 SHCNF_IDLIST           = 00001000h
@@ -465,7 +461,7 @@ DoInstall:
   mov ebx,eax
   call RebuildDownstream             ; recompute exePath/etc from chosen instDir
   invoke CreateDirectoryW,instDir,0
-  stdcall ExtractPayload,exePath
+  invoke CopyFileW,srcExe,exePath,FALSE
   test eax,eax
   je .fail
   test ebx,8                        ; portable (extract only, no registry)?
@@ -555,10 +551,14 @@ DoPortable:
 .argdir:
   stdcall CopyArgTo,portDir
 .do:
+  invoke GetModuleFileNameW,0,selfPath,MAXP
+  stdcall WCpy,srcExe,selfPath
+  stdcall DirOf,srcExe
+  stdcall WCat,srcExe,sSubNotegritExe
   stdcall WCpy,exePath,portDir
   stdcall WCat,exePath,sSubNotegritExe
   invoke CreateDirectoryW,portDir,0
-  stdcall ExtractPayload,exePath
+  invoke CopyFileW,srcExe,exePath,FALSE
   test eax,eax
   je .fail
   invoke MessageBoxW,0,sPort,sTitle,MB_OK or MB_ICONINFORMATION
@@ -674,61 +674,6 @@ proc CopyArgTo uses edi,dst
   ret
 endp
 
-; ---- extract the embedded notegrit.exe resource to [dstPath]. eax=1 ok, 0 fail ----
-proc ExtractPayload uses ebx esi edi, dstPath
-  locals
-    hFile   dd ?
-    written dd ?
-  endl
-  invoke FindResourceW,[gInst],1,RT_RCDATA
-  test eax,eax
-  je .fail
-  mov ebx,eax                      ; hRes
-  invoke SizeofResource,[gInst],ebx
-  test eax,eax
-  je .fail
-  mov edi,eax                      ; total bytes
-  invoke LoadResource,[gInst],ebx
-  test eax,eax
-  je .fail
-  mov ebx,eax                      ; hGlob
-  invoke LockResource,ebx
-  test eax,eax
-  je .fail
-  mov esi,eax                      ; pData
-  invoke CreateFileW,[dstPath],GENERIC_WRITE,0,0,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,0
-  cmp eax,-1
-  je .fail
-  mov [hFile],eax
-.wl:
-  test edi,edi
-  je .ok
-  cmp edi,16384
-  ja .chunk
-  lea eax,[written]
-  invoke WriteFile,[hFile],esi,edi,eax,0
-  test eax,eax
-  je .wfail
-  jmp .ok
-.chunk:
-  lea eax,[written]
-  invoke WriteFile,[hFile],esi,16384,eax,0
-  test eax,eax
-  je .wfail
-  sub edi,16384
-  add esi,16384
-  jmp .wl
-.ok:
-  invoke CloseHandle,[hFile]
-  mov eax,1
-  ret
-.wfail:
-  invoke CloseHandle,[hFile]
-.fail:
-  xor eax,eax
-  ret
-endp
-
 ; ---- registry helpers (Unicode) ----
 proc RegSetStrW uses ebx,root,sub,val,data
   stdcall WStrLen,[data]
@@ -783,13 +728,6 @@ data import
     CreateDirectoryW,'CreateDirectoryW',\
     CopyFileW,'CopyFileW',\
     DeleteFileW,'DeleteFileW',\
-    CreateFileW,'CreateFileW',\
-    WriteFile,'WriteFile',\
-    CloseHandle,'CloseHandle',\
-    FindResourceW,'FindResourceW',\
-    LoadResource,'LoadResource',\
-    LockResource,'LockResource',\
-    SizeofResource,'SizeofResource',\
     ExitProcess,'ExitProcess'
   import advapi32,\
     RegCreateKeyExW,'RegCreateKeyExW',\
@@ -820,19 +758,15 @@ end data
 section '.rsrc' resource data readable
   directory RT_ICON,icons,\
             RT_GROUP_ICON,group_icons,\
-            RT_MANIFEST, manifests, RT_RCDATA, payloads,\
+            RT_MANIFEST, manifests,\
             RT_VERSION, versions
   resource icons,1,LANG_NEUTRAL,icon1
   resource group_icons,IDR_ICON,LANG_NEUTRAL,gic
   resource manifests, 1, LANG_NEUTRAL, manifest_data
-  resource payloads, 1, LANG_NEUTRAL, payload_notegrit
   resource versions, 1, LANG_NEUTRAL, verinfo
   icon gic, icon1, '..\notegrit.ico'
   resdata manifest_data
     file 'installer.manifest'
-  endres
-  resdata payload_notegrit
-    file '..\notegrit.exe'
   endres
   versioninfo verinfo,VOS_NT_WINDOWS32,VFT_APP,0,LANG_NEUTRAL,0,\
     'FileVersion','1.00',\

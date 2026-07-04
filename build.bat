@@ -1,5 +1,6 @@
 @echo off
-REM NoteGrit build - assembles src\notegrit.asm and src\installer.asm with FASM. BSD-2 (see LICENSE).
+REM NoteGrit build - assembles src\notegrit.asm and src\installer.asm with FASM,
+REM then packages both into a release ZIP. BSD-2 (see LICENSE).
 setlocal enableextensions
 set "ROOT=%~dp0"
 set "FASM=%ROOT%tools\fasm\FASM.EXE"
@@ -21,5 +22,12 @@ echo [build] Win_x86_64_Installer.exe
 "%FASM%" "%ROOT%src\installer.asm" "%ROOT%Win_x86_64_Installer.exe"
 if errorlevel 1 ( echo [build] installer FAILED & exit /b 1 )
 
-echo [build] ok -^> notegrit.exe + Win_x86_64_Installer.exe
+echo [build] NoteGrit release ZIP
+set /p VER=<"%ROOT%VERSION.txt"
+set "ZIP=%ROOT%NoteGrit-%VER%.zip"
+if exist "%ZIP%" del "%ZIP%"
+powershell -NoProfile -Command "Compress-Archive -Path '%ROOT%notegrit.exe','%ROOT%Win_x86_64_Installer.exe' -DestinationPath '%ZIP%'"
+if errorlevel 1 ( echo [build] ZIP FAILED & exit /b 1 )
+
+echo [build] ok -^> notegrit.exe + Win_x86_64_Installer.exe + NoteGrit-%VER%.zip
 endlocal
