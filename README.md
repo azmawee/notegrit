@@ -67,7 +67,7 @@ The [**Releases** page](../../releases) has **two downloads**, pick what suits y
 
 | Download | Use it if... |
 |----------|--------------|
-| **`NoteGrit-1.00.zip`** (~11 KB) | You want a **proper Windows install**. Contains `Win_x86_64_Installer.exe` + `notegrit.exe`. Extract both to the same folder, run the installer. |
+| **`Win_x86_64_Installer.zip`** (~11 KB) | You want a **proper Windows install**. Contains `Win_x86_64_Installer.exe` + `notegrit.exe`. Extract to get a `NoteGrit_Installer\` folder, run the installer inside. |
 | **`notegrit.exe`** (~16 KB) | You want the **portable** editor. It's the whole app, no install, no admin, just run it (or drop it on a USB stick). |
 
 > No release build yet? Build it yourself in seconds, see [Build](#-build) below.
@@ -76,10 +76,11 @@ The [**Releases** page](../../releases) has **two downloads**, pick what suits y
 
 ## 🖥️ Install (proper Windows install)
 
-Download **`NoteGrit-1.00.zip`**, extract **both** files to the same folder, then run
-**`Win_x86_64_Installer.exe`** (it asks for admin via UAC). The installer copies
-`notegrit.exe` (which must sit beside it) into the install folder. A small setup dialog
-appears showing the install folder and exactly what it will do, with three options:
+Download **`Win_x86_64_Installer.zip`**, extract it to get a **`NoteGrit_Installer\`** folder
+(both files inside), then run **`Win_x86_64_Installer.exe`** (it asks for admin via UAC).
+The installer copies `notegrit.exe` (which must sit beside it) into the install folder. A
+small setup dialog appears showing the install folder and exactly what it will do, with
+three options:
 
 - **[✓] Add "Edit with NoteGrit" to the right-click menu** *(on by default)*, right-click
   *any* file to open it in NoteGrit.
