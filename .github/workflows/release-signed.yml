@@ -1,0 +1,85 @@
+name: release-signed
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to sign and upload to (e.g. v1.01)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-sign:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache FASM toolchain
+        uses: actions/cache@v4
+        with:
+          path: tools\fasm
+          key: fasm-1.73.32
+
+      - name: Download FASM if missing
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'tools\fasm\FASM.EXE')) {
+            $ErrorActionPreference = 'Stop'
+            Invoke-WebRequest -Uri 'https://flatassembler.net/fasmw17332.zip' -OutFile fasmw.zip
+            Expand-Archive -Path fasmw.zip -DestinationPath tools\fasm -Force
+            Remove-Item fasmw.zip
+          }
+
+      - name: Build
+        shell: cmd
+        run: avengers_assemble.bat
+
+      - name: Submit to SignPath
+        id: signpath
+        uses: SignPath/github-actions-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: notegrit
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: release-config
+          github-artifact-id: notegrit-${{ github.event.inputs.tag || github.event.release.tag_name }}
+          installer-artifact-path: notegrit.exe, Win_x86_64_Installer.exe, Win_x86_64_Installer.zip
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Compute SHA256 of signed outputs
+        shell: pwsh
+        run: |
+          Get-ChildItem signed -Filter *.exe, *.zip | ForEach-Object {
+            $h = (Get-FileHash -Algorithm SHA256 $_.FullName).Hash.ToLower()
+            "$h  $($_.Name)" | Out-File -Append sha256sums.txt -Encoding ascii
+            Write-Host "$h  $($_.Name)"
+          }
+
+      - name: Resolve release tag
+        id: rel
+        shell: pwsh
+        run: |
+          $tag = '${{ github.event.inputs.tag }}'
+          if (-not $tag) { $tag = '${{ github.event.release.tag_name }}' }
+          "tag=$tag" | Out-File -Append $env:GITHUB_OUTPUT -Encoding ascii
+
+      - name: Upload signed binaries to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.rel.outputs.tag }}
+          files: |
+            signed/notegrit.exe
+            signed/Win_x86_64_Installer.exe
+            signed/Win_x86_64_Installer.zip
+            sha256sums.txt
+          body: |
+            Signed release build via SignPath Foundation.
+
+            SHA256 checksums are in `sha256sums.txt`.

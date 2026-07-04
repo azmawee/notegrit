@@ -267,6 +267,13 @@ First public release. Ships two files:
 Both are 32-bit Windows PE files (run on x86 and x64 Windows 10/11), built directly from
 the FASM source in `src\`. See [Checksums](#-checksums) to verify your download.
 
+Releases are signed via the [SignPath Foundation](https://signpath.org) (free Authenticode
+code signing for open-source projects). **v1.00 is currently unsigned**, pending SignPath
+approval; signed binaries will ship from the next release onward via the
+[`release-signed`](.github/workflows/release-signed.yml) workflow.
+
+See [CHANGELOG](CHANGELOG.md) for what changed.
+
 ---
 
 ## 🙏 Credits
