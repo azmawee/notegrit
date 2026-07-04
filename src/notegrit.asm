@@ -1,5 +1,5 @@
 ; Note Grit - a tiny editor. BSD 2-Clause (see LICENSE). Version in sVer; bump +0.01 per change.
-format PE GUI 4.0
+format PE GUI 4.0 large
 entry Main
 include 'win32a.inc'
 
@@ -31,6 +31,7 @@ EM_EXLIMITTEXT     = WM_USER+53
 EM_SETZOOM         = WM_USER+225
 EM_FINDTEXTEX      = WM_USER+79
 EM_STREAMIN        = WM_USER+73
+EM_STREAMOUT       = WM_USER+74
 SF_TEXT            = 00000001h
 
 SCF_ALL         = 00000004h
@@ -322,7 +323,7 @@ sTail  db ' - Note Grit',0
 sRegKey  db 'Software\NoteGrit',0
 sRegZoom db 'Zoom',0
 sRegDark db 'Dark',0
-sVer   db '1.00',0
+sVer   db '1.01',0
 sCap   db 'Note Grit',0
 sCapFmt db 'About Note Grit v%s',0
 sCapBuf rb 48
@@ -834,28 +835,32 @@ proc StreamCallback cookie,pbBuff,cb,pcb
 endp
 
 PushOutFile:
-  invoke SendMessageA,[gEdit],WM_GETTEXTLENGTH,0,0
-  mov ebx,eax
-  lea ecx,[ebx+1]
-  invoke GlobalAlloc,GMEM_FIXED,ecx
-  test eax,eax
-  je .sdone
-  mov [hMem],eax
-  lea ecx,[ebx+1]
-  invoke SendMessageA,[gEdit],WM_GETTEXT,ecx,[hMem]
   invoke CreateFileA,gPath,GENERIC_WRITE,0,0,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,0
   cmp eax,INVALID_HANDLE_VALUE
-  je .sfree
+  je .sdone
   mov [hFile],eax
-  invoke WriteFile,[hFile],[hMem],ebx,gRead,0
+  lea edi,[estrm]
+  mov ecx,sizeof.EDITSTREAM/4
+  xor eax,eax
+  rep stosd
+  mov eax,[hFile]
+  mov [estrm.dwCookie],eax
+  mov [estrm.pfnCallback],StreamOutCallback
+  lea eax,[estrm]
+  invoke SendMessageA,[gEdit],EM_STREAMOUT,SF_TEXT,eax
   invoke CloseHandle,[hFile]
   xor eax,eax
   mov [gDirty],eax
   call SetTitle
-.sfree:
-  invoke GlobalFree,[hMem]
 .sdone:
   ret
+
+; EM_STREAMOUT callback: write the chunk RichEdit handed us straight to the file.
+proc StreamOutCallback cookie,pbBuff,cb,pcb
+  invoke WriteFile,[cookie],[pbBuff],[cb],[pcb],0
+  xor eax,eax                  ; 0 = continue streaming
+  ret
+endp
 
 OfferSave:
   cmp [gDirty],0
@@ -2252,7 +2257,7 @@ section '.rsrc' resource data readable
   resource manifests, 1, LANG_NEUTRAL, manifest_data
   icon gic, icon1, '..\notegrit.ico'
   versioninfo verinfo,VOS_NT_WINDOWS32,VFT_APP,0,LANG_NEUTRAL,0,\
-    'FileVersion','1.00',\
+    'FileVersion','1.01',\
     'CompanyName','Azmawee',\
     'ProductName','NoteGrit'
   resdata manifest_data
